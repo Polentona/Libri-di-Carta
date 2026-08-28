@@ -1,0 +1,3 @@
+import { patchBook, removeBook } from '@/lib/books-db'; import type { BookDraft } from '@/types/book';
+export async function PATCH(request:Request,{params}:{params:Promise<{id:string}>}){try{const{id}=await params;return Response.json({book:await patchBook(Number(id),await request.json() as Partial<BookDraft>)});}catch(error){return Response.json({error:error instanceof Error?error.message:'Errore'},{status:500});}}
+export async function DELETE(_request:Request,{params}:{params:Promise<{id:string}>}){try{const{id}=await params;await removeBook(Number(id));return new Response(null,{status:204});}catch(error){return Response.json({error:error instanceof Error?error.message:'Errore'},{status:500});}}

@@ -1,0 +1,3 @@
+import { allBooks, insertBook } from '@/lib/books-db'; import type { BookDraft } from '@/types/book';
+export async function GET(){try{return Response.json({books:await allBooks()});}catch(error){return Response.json({error:error instanceof Error?error.message:'Errore'},{status:500});}}
+export async function POST(request:Request){try{const book=await request.json() as BookDraft;if(!book.title?.trim()||!book.author?.trim())return Response.json({error:'Titolo e autore sono obbligatori'},{status:400});return Response.json({book:await insertBook(book)},{status:201});}catch(error){return Response.json({error:error instanceof Error?error.message:'Errore'},{status:500});}}

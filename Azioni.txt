@@ -98,20 +98,21 @@ testato ISBN 9788854147317, l'amore e l'odio:
 TESTO SEMPRE DA BROWSER DI GOOGLE CHROME
 
 ritestato ISBN 9788854147317, l'amore e l'odio:
-- il titolo del romanzo non riconosce i caratteri speciale quindi lo vedo compilato con "L&apos;amore e L&apos;odio"; non va assolutamente bene. Deve riconoscere tutti i caratteri speciali quindi mi aspetto che il titolo sia "l'amore e l'odio"
-- come genere compare ancora solo romanzo rosa, ignorando completamente "fantasy" e "Young adult"
-- prequel e sequel ancora non compaiono
+- [x] ~~il titolo del romanzo non riconosce i caratteri speciale quindi lo vedo compilato con "L&apos;amore e L&apos;odio"; non va assolutamente bene. Deve riconoscere tutti i caratteri speciali quindi mi aspetto che il titolo sia "l'amore e l'odio"~~
+- [x] ~~come genere compare ancora solo romanzo rosa, ignorando completamente "fantasy" e "Young adult"~~
+- [x] ~~prequel e sequel ancora non compaiono~~
 
 isbn 9788845201127, la voce dei morti:
-- non compare nessun genere
-- non compare il sequel
-- l'anteprima della copertina non si vede; compare l'icona del foglio rotto
+- [x] ~~non compare nessun genere~~
+- [x] ~~non compare il sequel~~
+- [x] ~~l'anteprima della copertina non si vede; compare l'icona del foglio rotto~~
 
 isbn 9788820055684, doctor sleep:
-- come genere compare ancora solo "paranormale" ignorando completamente fantasy, horror e thriller
-- non compare piu il prequel, prima dell'ultima modifica invece compariva correttamente
+- [x] ~~come genere compare ancora solo "paranormale" ignorando completamente fantasy, horror e thriller~~
+- [x] ~~non compare piu il prequel, prima dell'ultima modifica invece compariva correttamente~~
 
 isbn 9788850214884, se potessi rivederti:
-- non compare il nome della saga
-- sequel e prequel non compaiono
-- come genere esce solo paranormale, ignorando completamente Romance e fantasy
+- [x] ~~non compare il nome della saga~~
+- [x] ~~sequel e prequel non compaiono~~
+- [x] ~~come genere esce solo paranormale, ignorando completamente Romance e fantasy~~
+  Commento: la risposta della ricerca consolida ora tutte le schede della stessa edizione in un unico risultato completo, preservando generi, saga, volumi adiacenti e copertina recuperati dalle diverse fonti. La decodifica delle entità HTML e Unicode avviene prima della pulizia e mantiene le maiuscole/minuscole naturali del titolo. Correzione generale verificata con test automatici e build di produzione.

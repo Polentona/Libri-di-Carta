@@ -169,20 +169,6 @@ function catalogSeriesFor(title: string) {
   }
   return null;
 }
-const clean = (value: unknown) =>
-  String(value ?? '')
-    .replace(/<[^>]*>/g, ' ')
-    .replace(/https?:\/\/\S+/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-const rawText = (value: unknown) => String(value ?? '').trim();
-const plot = (value: unknown) =>
-  clean(value)
-    .split(
-      /(?:In questo libro sono presenti|Content warning|Recension[ei]|Film|Serie TV|Prezzo|Acquista|Spedizione|Disponibil)/i,
-    )[0]
-    .replace(/\?\s+e\s+(?=[a-zà-ÿ])/g, '… e ')
-    .trim();
 const decodeHtml = (value: string) =>
   value
     .replace(/&nbsp;|&#160;/gi, ' ')
@@ -191,10 +177,29 @@ const decodeHtml = (value: string) =>
     .replace(/&amp;|&#38;/gi, '&')
     .replace(/&lt;/gi, '<')
     .replace(/&gt;/gi, '>')
-    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+    .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code)))
     .replace(/&#x([0-9a-f]+);/gi, (_, code) =>
-      String.fromCharCode(parseInt(code, 16)),
+      String.fromCodePoint(parseInt(code, 16)),
     );
+const textValue = (value: unknown) =>
+  typeof value === 'string' || typeof value === 'number' ? String(value) : '';
+export const clean = (value: unknown) =>
+  decodeHtml(textValue(value))
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/https?:\/\/\S+/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+const rawText = (value: unknown) =>
+  decodeHtml(textValue(value))
+    .replace(/\\u0026/gi, '&')
+    .trim();
+const plot = (value: unknown) =>
+  clean(value)
+    .split(
+      /(?:In questo libro sono presenti|Content warning|Recension[ei]|Film|Serie TV|Prezzo|Acquista|Spedizione|Disponibil)/i,
+    )[0]
+    .replace(/\?\s+e\s+(?=[a-zà-ÿ])/g, '… e ')
+    .trim();
 function decodedJsonText(value: string) {
   try {
     return JSON.parse(`"${value}"`);
@@ -299,15 +304,15 @@ const titleCase = (value: string) =>
         : lower.charAt(0).toLocaleUpperCase('it') + lower.slice(1);
     })
     .join(' ');
-const naturalTitle = (value: string) => {
+export const naturalTitle = (value: string) => {
   const trimmed = value.trim();
   const normalized = /^[^a-zà-ÿ]*$/.test(trimmed)
     ? titleCase(trimmed)
-    : trimmed.charAt(0).toLocaleUpperCase('it') + trimmed.slice(1);
+    : trimmed;
   return normalized.replace(/\.\s+(?:un|una)\s+[^.?!]{8,180}\?$/i, '').trim();
 };
 function titleInfo(value: unknown) {
-  const raw = clean(decodeHtml(String(value ?? '')));
+  const raw = clean(value);
   const match = raw.match(/\(([^()#]+?)(?:,\s*|\s+)#\s*(\d+)\)/i);
   const saga = match?.[1]?.trim() || '';
   const sagaOrder = match ? Number(match[2]) : null;
@@ -385,7 +390,7 @@ function jsonLd(html: string) {
 function genresFromHtml(html: string) {
   const found = new Set<string>();
   for (const match of html.matchAll(
-    /(?:genres?|shelves|categories|tags)[^\[<]{0,80}(?:\[|>)([\s\S]{0,1600}?)(?:\]|<\/)/gi,
+    /(?:genres?|shelves|categories|tags)[^[<]{0,80}(?:\[|>)([\s\S]{0,1600}?)(?:\]|<\/)/gi,
   ))
     for (const genre of genres(match[1])) found.add(genre);
   for (const match of html.matchAll(/\/(?:genres|shelf)\/([a-z-]+)/gi))
@@ -1019,5 +1024,33 @@ export async function GET(request: Request) {
       return true;
     })
     .slice(0, 8);
+  // A code identifies an edition, not a list of search suggestions.  Retailers
+  // often expose the same edition several times with complementary metadata;
+  // collapse those records so the form always receives the fully enriched
+  // candidate instead of making the user choose a partial duplicate.
+  const exact = results.filter(
+    (item) =>
+      item.code.replace(/[\s-]/g, '').toUpperCase() ===
+      normalized.toUpperCase(),
+  );
+  if (exact.length) {
+    const consolidated = exact.reduce(
+      (current, item) => merge(current, item),
+      results[0] && exact.includes(results[0]) ? results[0] : exact[0],
+    );
+    results = [
+      {
+        ...consolidated,
+        title: naturalTitle(clean(consolidated.title)),
+        genres: [
+          ...new Set([
+            ...consolidated.genres,
+            ...inferGenres(consolidated.plot),
+            ...(seriesGenres[consolidated.saga] || []),
+          ]),
+        ],
+      },
+    ];
+  }
   return Response.json({ codeType: type, candidates: results });
 }

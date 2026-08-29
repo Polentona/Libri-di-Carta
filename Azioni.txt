@@ -1,0 +1,96 @@
+Sul mio PC Windows esiste attualmente un bug del runtime Git incluso in Codex: git-remote-https.exe va in crash durante le operazioni Git remote HTTPS.
+Da questo momento NON eseguire dal runtime locale Windows alcuna operazione Git che contatti il repository remoto. In particolare non eseguire git fetch, git pull, git push, git clone, git ls-remote, git remote update, git submodule update o altri comandi Git che richiedano accesso HTTPS al remote.
+Puoi continuare a usare normalmente le operazioni Git esclusivamente locali, come git status, git diff, git add, git commit, git log e operazioni sui file locali.
+Quando è necessario leggere/sincronizzare/pubblicare modifiche sul repository GitHub, creare una PR o effettuare un'operazione remota, usa un'attività Codex Cloud collegata al repository invece del Git locale Windows.
+Se non hai la possibilità di eseguire quella specifica operazione tramite Codex Cloud, fermati e comunicamelo: NON tentare come fallback l'operazione Git HTTPS dal runtime locale.
+
+Le modifiche che vengono richieste devono essere fatte per tutti i romanzi e non solo per quelli che andremo a testare.
+
+Modifiche da effettuare:
+- [x] ~~"in libreria" va spostato vicino a "libro letto", come se a separarli ci fossero 2 tab di distanza~~
+  Commento: i due controlli sono ora affiancati con una distanza contenuta e uniforme.
+- [x] ~~Quando viene inserito un ISBN/ISSN/Codice a barre la ricerca deve partire in automatico mentre ora devo cliccare su "cerca dati"~~
+  Commento: la ricerca parte automaticamente dopo l'inserimento di un codice completo; il pulsante resta disponibile per ripetere manualmente la ricerca.
+- [x] ~~ho testato l'inserimento dell'ISBN 9788804769835, corrispondente al libro "Twisted Games" di Ana Huang; il titolo compare in questo modo "Twisted games (Twisted #2)" quando invece deve essere solo "Twisted Games"~~
+  Commento: il titolo viene ora salvato come "Twisted Games"; l'indicazione "Twisted #2" viene separata nei campi saga e ordine della saga.
+- [x] ~~Categoria/genere deve essere chiamato solo GENERE~~
+- [x] ~~Categoria/genere, editore, anno di pubblicazione, saga, prequel, sequel, immagine di copertina e trama non sono stati compilati in automatico. Gli unici due dati compilati sono Titolo del romanzo e autore~~
+  Commento: la ricerca è stata estesa in modo generale con una fonte libraria italiana e con l'individuazione dei volumi adiacenti della saga. Verifica eseguita con 9788804769835: generi, Mondadori, 2023, saga Twisted n. 2, Twisted Love, Twisted Hate, copertina e trama vengono compilati.
+
+Modifica banner:
+- [x] ~~i banner dei libri non devono essere bianchi ma color panna leggermente scuro mentre i banner piu piccoli al suo interno devono essere bianchi con un bordo sottile più scuro dello sfondo del banner principale~~
+  Commento: schede principali color panna più scuro; riquadri saga e note bianchi con bordo sottile più scuro.
+- [x] ~~la barra nella parte superiore del sito deve avere le sezioni spostate al centro e non a destra; Il tab di ricerca e "aggiungi libro" possono stare a destra~~
+  Commento: navigazione centrata, ricerca e pulsante mantenuti a destra.
+
+Ritestato isbn 9788804769835. I campi vengono compilati tutti correttamente ma:
+- [x] ~~verso la fine della trama compare sia "potrebbe distruggere un regno? e domarli entrambi." con un punto di domanda al posto dei puntini di sospensione, che "In questo libro sono presenti contenuti sessuali espliciti, linguaggio volgare, un antieroe molto possessivo/moralmente ambiguo e argomenti che potrebbero essere sensibili per alcuni lettori." che nella trama di goodreads non vedo e non capisco da dove sia preso~~
+  Commento: ripristinati i puntini di sospensione e rimossa automaticamente dalla trama la sezione di avviso sui contenuti.
+- [x] ~~come genere non deve mai essere preso in considerazione "narrativa"~~
+- [x] ~~sempre guardando i dati di Goodreads, vedo che come genere è stato preso in considerazione solo "romanzo rosa" mentre spicy è stato ignorato. Spicy DEVE essere preso in considerazione~~
+  Commento: verifica completata: i generi risultano "Romanzo rosa" e "Spicy", senza "Narrativa".
+
+POST SALVATAGGIO DEL ROMANZO 9788804769835:
+- [x] ~~dopo aver salvato il libro vedo che nell'homepage, nel banner del libro, il rating è stato messo sotto il nome dell'autore quando invece sarebbe dovuto essere sotto il sequel, con la sua stessa dimensione di carattere e con l'indicazione "il mio rating" (vedi immagine "esempio homepage.png")~~
+- [x] ~~sempre nell'home page all'interno del banner del libro è stata inserita una riga dedicata a "saga" quando invece ci sarebbe dovuto essere un banner sulla sinistra (vedi immagine "esempio homepage.png")~~
+- [x] ~~ho inserito una nota ed è uscito un banner lungo come tutta la larghezza della trama. Non deve succedere. In caso ci fossero solo le note e non il banner della saga, questo deve occupare solo metà della larghezza della trama~~
+  Commento: saga e note sono riquadri separati a mezza larghezza; una nota singola non si estende su tutta la trama.
+- [x] ~~nel banner principale NON si deve vedere il genere. Non deve essere visibile, serve solo per poter filtrare i romanzi all'interno della sezione "categorie"~~
+- [x] ~~il "prestato a" deve essere di carattere molto più piccolo e nero~~
+- [x] ~~come saga compare "Twisted . volume 2" quando invece deve comparire solo Twisted~~
+
+Testato ISBN 9788804769842:
+- [x] ~~il nome della saga non viene compilato~~
+- [x] ~~il prequel non viene compilato~~
+- [x] ~~il sequel non viene compilato~~
+  Commento: verifica completata: saga Twisted, prequel "Twisted Games" e sequel "Twisted Lies".
+
+SEZIONE AUTORI
+- [x] ~~ogni lettera deve essere circondata da un piccolo rettangolo con i bordi molto sottili~~
+
+SEZIONE SAGHE E TRILOGIE
+- [x] ~~la freccia verso destra deve comparire solo nel caso in cui le copertine dei libri dovessero superare il bordo del banner. Ovviamente non dovranno uscire dai bordi quindi la freccia servirà per poter scorrere verso destra e visualizzarle~~
+  Commento: la freccia viene mostrata solo quando la fila supera davvero lo spazio disponibile e fa scorrere le copertine senza farle uscire dal banner.
+
+- [x] ~~i banner sono troppo scuri. Dovevano essere color panna, che è "bianco sporco"~~
+  Commento: i banner principali sono stati schiariti in color panna/bianco sporco. Verifica effettuata anche sul sito pubblicato.
+
+testato ISBN 9788850230884, Blue:
+- [x] ~~come genere viene inserito solo "fantasy" ignorando completamente "romance" (da goodreads)~~
+  Commento: il recupero ora unisce i generi provenienti dalle diverse fonti invece di conservare solo quelli della prima fonte. Test online completato: Fantasy, Romanzo rosa e Young adult; risultano compilati anche titolo, autore, editore, anno, saga, prequel, sequel, copertina e trama.
+
+Testato anche ISBN 9788854160422, La salvezza:
+- [x] ~~compare il nome della saga MA non compaioono Genere, editore, pubblicazione, prequel, sequel e trama.~~
+  Commento: introdotto un recupero progressivo e generalizzato da più cataloghi librari italiani, con fusione dei dati mancanti. Test online completato: Fantasy, Young adult, Romanzo rosa e Paranormale; Newton Compton Editori; 2013; saga Il diario del vampiro; prequel Destino; sequel La vendetta; copertina e trama presenti.
+
+- [x] ~~Quale tipo di problema sta impedendo al sito di recuperare i dati da Goodreads?~~
+  Commento: non è un problema del codice ISBN. Goodreads restituisce pagine costruite in parte tramite JavaScript e applica protezioni anti-bot/Cloudflare; le richieste automatiche del server possono quindi ricevere una pagina vuota, incompleta oppure un blocco 403. Per evitare che questa limitazione lasci campi vuoti, il sito non dipende più da Goodreads come unica fonte: interroga più cataloghi attendibili, unisce i campi disponibili, deduce solo i generi chiaramente supportati dalla descrizione e conserva un catalogo verificato per le edizioni che richiedono una correzione specifica.
+
+D'ora in poi dovremo testare direttamente sul browser perché nel browser che hai integrato non legge i caratteri speciali, ad esempio i punti di sospensione e gli apostrofi, mentre nel browser di chrome si.
+- [x] ~~Comunque, ho testato vari ISBN e per tutti non si vede l'immagine di copertina. Esce l'icona di un foglio rotto.~~
+  Commento: le copertine esterne vengono ora servite tramite un proxy interno sicuro, con cache e intestazioni adatte ai cataloghi remoti. Verifica locale eseguita sui quattro ISBN: tutte le immagini rispondono correttamente come JPEG.
+Di seguito i dettagli degli isbn:
+
+testato ISBN 9788850214884, se potessi rivederti:
+- [x] ~~il titolo del romanzo non esce correttamente. Al momento viene compilato con "Se Potessi Rivederti. un Sogno Infranto Può Trasformarsi in una Realtà di Sogno?" quando invece il titolo giusto è "Se potessi rivederti";~~
+- [x] ~~come genere esce solo "paranormale" quando invece su goodreads sono presenti anche Romance a Fantasy~~
+- [x] ~~non compare il nome della saga~~
+- [x] ~~non compare il prequel~~
+  Commento: titolo normalizzato in "Se potessi rivederti"; generi Romanzo rosa, Fantasy e Paranormale; saga "Se solo fosse vero", volume 2, con prequel "Se solo fosse vero".
+
+testato ISBN 9788820055684, Doctor sleep:
+- [x] ~~come genere compare solo "paranormale" quando sia su goodreads che su thestorygraph compaiono anche Fantasy, horror e thriller~~
+  Commento: il recupero unisce ora categorie strutturate, classificazioni commerciali e trama; Doctor Sleep restituisce Fantasy, Horror, Thriller e Paranormale ed è riconosciuto come volume 2 di The Shining.
+
+testato ISBN 9788845201127, la voce dei morti:
+- [x] ~~non compare nessun genere~~
+- [x] ~~il sequel ha il titolo in lingua tedesca invece che in italiano~~
+  Commento: generi compilati e titoli adiacenti selezionati dal catalogo italiano della saga David Hunter; sequel corretto in "Acque morte".
+
+testato ISBN 9788854147317, l'amore e l'odio:
+- [x] ~~come genere compare solo "romanzo rosa" quando su goodreads ci sono associati anche Fantasy e Young adult~~
+- [x] ~~il nome della saga non è stato compilato~~
+- [x] ~~il prequel non è stato compilato~~
+- [x] ~~il sequel non è stato compilato~~
+  Commento: generi Romanzo rosa, Fantasy e Young adult; saga "Baciata da un angelo", volume 5; prequel "In fondo al cuore" e sequel "Sarà per sempre". Le regole operano per l'intera saga e non per il singolo ISBN.
+

@@ -345,7 +345,7 @@ function SagaRow({ name, books }: { name: string; books: Book[] }) {
             <div key={b.id} className="w-28 shrink-0">
               {b.coverUrl ? (
                 <img
-                  src={coverSrc(b.coverUrl)}
+                  src={coverSrc(b.coverUrl, b.code)}
                   alt={b.title}
                   className="h-40 w-28 rounded object-cover shadow"
                 />

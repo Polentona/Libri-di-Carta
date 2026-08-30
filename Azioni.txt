@@ -116,3 +116,50 @@ isbn 9788850214884, se potessi rivederti:
 - [x] ~~sequel e prequel non compaiono~~
 - [x] ~~come genere esce solo paranormale, ignorando completamente Romance e fantasy~~
   Commento: la risposta della ricerca consolida ora tutte le schede della stessa edizione in un unico risultato completo, preservando generi, saga, volumi adiacenti e copertina recuperati dalle diverse fonti. La decodifica delle entità HTML e Unicode avviene prima della pulizia e mantiene le maiuscole/minuscole naturali del titolo. Correzione generale verificata con test automatici e build di produzione.
+
+
+testato isbn 9788846204530, RING:
+- non compare l'editore
+- non compare l'anno di pubblicazione
+- la trama esce sbagliata
+
+testato isbn 9788809795099, DREAMLESS:
+- [x] ~~il prequel esce con il titolo sbagliato "Starcrossed Angelini, Josephine And Rossari, Marco". Deve uscire solo "Starcrossed"~~
+  Commento: i titoli dei volumi adiacenti vengono ora ripuliti in modo generale dai nomi autore nel formato invertito "Cognome, Nome". Verifica reale completata: il prequel restituito è "Starcrossed".
+
+isbn 9788845278389, IL VALZER LENTO DELLE TARTARUGHE:
+- non compare la saga
+- non compare il prequel
+- non compare il sequel
+
+isbn 9788850225798, IL LIBRO DELLE ANIME:
+compare tutto correttamente
+
+isbn 9788817056540, FALLEN IN LOVE:
+- non compare il prequel
+- il sequel è errato
+
+isbn 9788855441247, LA PIUMA MAGICA DI GWENDY:
+- non compare il nome della saga
+- non compare il prequel
+- non compare il sequel
+
+ISBN 9788804681960, ORIGIN:
+- [x] ~~come genere compare solo "thriller" quando invece ci sono associati anche Mistery, Thriller, Suspance e Adventure (da goodreads)~~
+  Commento: la fusione generale delle fonti restituisce Thriller, Giallo (Mystery), Suspense e Avventura; verifica reale completata sull'ISBN indicato.
+- non compare il sequel
+- nel campo della trama NON sta venendo esposta la trama ma qualcos'altro
+
+ISBN 9788868363727, LA CANZONE DI SUSANNAH:
+- nel campo TRAMA compare una trama diversa rispetto a quella visibile su Goodreads; esce piu lunga e soprattutto si rompe, non è completa
+
+- [x] ~~ISBN 9788809885806, LA RAGAZZA DELLE PERLE era già stato testato, inserito e salvato ma ricaricando la pagina non si vede più l'immagine di copertina~~
+  Commento: tutte le copertine salvate passano ora anche il codice ISBN al proxy; se l'URL originario non è più disponibile, il proxy prova automaticamente fonti di copertina stabili. Fallback verificato con risposta immagine valida.
+
+
+Nel sito di Goodreads, ispezionando le varie sezioni, ho visto che:
+- SAGA: nella <div_class='BookPageTitleSection_title'> <h3 class="Text Text_title3 Text_italic Text_regular Text_subdued" aria-label="NUMERO LIBRO DELLA SAGA + NOME DELLA SAGA"> compaiono sia il nome della saga che la posizione del romanzo al suo interno
+- TRAMA: in <div data-testid="description" class="BookPageMetadataSection__description"><div class="TruncatedContent" tabindex="-1"><div class="TruncatedContent__text TruncatedContent__text--large TruncatedContent__text--expanded" tabindex="-1" data-testid="contentContainer"><div class="DetailsLayoutRightParagraph"><div class="DetailsLayoutRightParagraph__widthConstrained"><span class="Formatted">La fine della Torre Nera è sempre più vicina. Solo due Vettori sono rimasti a sorreggerla, e quando crolleranno il perno dell'universo salterà e la realtà sarà sommersa dalle tenebre. Roland Deschain, l'ultimo cavaliere, e la sua banda combattono valorosamente l'avanzata del male, ma ora il gruppo non è più compatto. Il demone-femmina che si è impadronito del corpo di Susannah, la moglie di Eddie, ha usato la sfera del buio per trasportarsi dal Medio-Mondo nella New York del 1999: proprio qui, in un punto preciso di Manhattan, dovrà partorire la creatura concepita per distruggere la Torre. Sulle sue tracce si precipitano il piccolo Jake, Oy, il "bimbolo" parlante, e Père Callaban, per impedire che la donna arrivi all'appuntamento fatale.</span></div></div></div><div class=""></div></div></div> si trova la trama
+
+- [x] ~~questi percorsi ti possono aiutare a recepire i dati di ogni romanzo che inseriremo?~~
+  Commento: sì. Il parser generale legge ora la trama dal contenitore Goodreads `data-testid="description"` e saga/posizione dall'`aria-label` del titolo, incluse varianti nominali, decimali ed esadecimali delle entità HTML. Goodreads resta una fonte complementare perché può bloccare le richieste automatiche; i dati continuano quindi a essere fusi con gli altri cataloghi.

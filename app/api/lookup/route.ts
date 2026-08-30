@@ -221,7 +221,43 @@ function usefulPlot(value: string) {
     ? result
     : '';
 }
+export function goodreadsMetadata(html: string) {
+  const descriptionSection =
+    html.match(
+      /<div[^>]+data-testid=["']description["'][^>]*>([\s\S]{0,14000}?)<div[^>]+class=["']["'][^>]*>/i,
+    )?.[1] || '';
+  const description = usefulPlot(
+    descriptionSection.match(
+      /<span[^>]+class=["'][^"']*\bFormatted\b[^"']*["'][^>]*>([\s\S]*?)<\/span>/i,
+    )?.[1] || descriptionSection,
+  );
+  const titleSection =
+    html.match(
+      /<div[^>]+class=["'][^"']*BookPageTitleSection_+title[^"']*["'][^>]*>([\s\S]{0,3500}?)<\/div>/i,
+    )?.[1] || '';
+  const label = clean(
+    titleSection.match(/<h3[^>]+aria-label=["']([^"']+)["'][^>]*>/i)?.[1],
+  );
+  let saga = '';
+  let sagaOrder: number | null = null;
+  const patterns = [
+    /(?:book|libro|volume|vol\.?|#)\s*(\d+(?:\.\d+)?)\s*(?:of|di|della saga|[-–—:])\s*(.+?)(?:\s+series)?$/i,
+    /(.+?)\s*(?:#|book|libro|volume|vol\.?)\s*(\d+(?:\.\d+)?)$/i,
+    /^(\d+(?:\.\d+)?)\s*[-–—:]\s*(.+)$/i,
+  ];
+  for (const pattern of patterns) {
+    const match = label.match(pattern);
+    if (!match) continue;
+    const numberFirst = /^\d/.test(match[1]);
+    sagaOrder = Number(numberFirst ? match[1] : match[2]) || null;
+    saga = clean(numberFirst ? match[2] : match[1]).replace(/\s+series$/i, '');
+    break;
+  }
+  return { description, saga: naturalTitle(saga), sagaOrder };
+}
 function plotFromHtml(html: string, requestedCode: string) {
+  const goodreadsDescription = goodreadsMetadata(html).description;
+  if (goodreadsDescription) return goodreadsDescription;
   const exact =
     html.match(
       new RegExp(
@@ -239,7 +275,7 @@ function plotFromHtml(html: string, requestedCode: string) {
     if (result) return result;
   }
   const metas = [
-    ...html.matchAll(
+    ...exact.matchAll(
       /<meta[^>]+(?:property|name)=["'](?:og:description|description)["'][^>]+content=["']([\s\S]*?)["'][^>]*>/gi,
     ),
   ];
@@ -248,7 +284,7 @@ function plotFromHtml(html: string, requestedCode: string) {
     if (result) return result;
   }
   const sections = [
-    ...html.matchAll(
+    ...exact.matchAll(
       /(?:Trama|Sinossi|Descrizione(?: del libro)?)[\s\S]{0,500}?<(?:div|p)[^>]*>([\s\S]{120,5000}?)<\/(?:div|p)>/gi,
     ),
   ];
@@ -359,7 +395,7 @@ function italianDetails(html: string, requestedCode: string) {
     ...analytics.matchAll(/"item_category\d*":"([^"]+)"/gi),
   ].map((match) => match[1]);
   const yearMatch = html.match(
-    /Anno (?:edizione|pubblicazione):?[\s\S]{0,250}?\b((?:19|20)\d{2})\b/i,
+    /(?:Anno (?:edizione|pubblicazione)|Data (?:di )?Pubblicazione|Pubblicato|edito da)[\s\S]{0,250}?\b((?:19|20)\d{2})\b/i,
   );
   return {
     publisher,
@@ -413,6 +449,7 @@ function candidatesFrom(
   const italian = italianDetails(html, requestedCode);
   const htmlDescription = plotFromHtml(html, requestedCode);
   const htmlGenres = genresFromHtml(html);
+  const goodreads = goodreadsMetadata(html);
   for (const item of jsonLd(html)) {
     const type = clean(item['@type']);
     if (!/(Book|Product)/i.test(type)) continue;
@@ -458,8 +495,8 @@ function candidatesFrom(
       publisher: person(item.publisher) || italian.publisher,
       publicationYear:
         Number(date.match(/\d{4}/)?.[0]) || italian.publicationYear,
-      saga: structuredSeries || info.saga,
-      sagaOrder: info.sagaOrder,
+      saga: structuredSeries || info.saga || goodreads.saga,
+      sagaOrder: info.sagaOrder || goodreads.sagaOrder,
       prequel: '',
       sequel: '',
       coverUrl: coverUrl || null,
@@ -492,6 +529,23 @@ async function page(url: string) {
 }
 async function source(url: string, name: string, query: string, type: string) {
   return candidatesFrom(await page(url), name, query, type);
+}
+async function goodreadsSources(query: string, type: string) {
+  const searchUrl = `https://www.goodreads.com/search?q=${encodeURIComponent(query)}`;
+  const searchHtml = await page(searchUrl);
+  const output = candidatesFrom(searchHtml, 'Goodreads', query, type);
+  const links = [
+    ...searchHtml.matchAll(/href=["'](\/book\/show\/[^"'?#]+)[^"']*["']/gi),
+  ].map((match) => new URL(match[1], 'https://www.goodreads.com').toString());
+  const details = await Promise.all(
+    [...new Set(links)].slice(0, 2).map((url) => page(url)),
+  );
+  return [
+    ...output,
+    ...details.flatMap((html) =>
+      candidatesFrom(html, 'Goodreads', query, type),
+    ),
+  ];
 }
 function inferGenres(value: string) {
   const found = new Set<string>();
@@ -591,7 +645,7 @@ async function indexedSources(query: string, type: string) {
       }
     })
     .filter((url) =>
-      /https?:\/\/(?:www\.)?(?:libraccio\.it|unilibro\.it|ibs\.it|libreriauniversitaria\.it|lafeltrinelli\.it|mondadoristore\.it|giunti\.it|newtoncompton\.com|hoepli\.it|abebooks\.(?:com|it|co\.uk))\//i.test(
+      /https?:\/\/(?:www\.)?(?:libraccio\.it|unilibro\.it|ibs\.it|libreriauniversitaria\.it|lafeltrinelli\.it|mondadoristore\.it|giunti\.it|bompiani\.it|rizzolilibri\.it|sperling\.it|editricenord\.it|newtoncompton\.com|hoepli\.it|abebooks\.(?:com|it|co\.uk))\//i.test(
         url,
       ),
     );
@@ -757,16 +811,36 @@ async function neighbours(saga: string, order: number | null, author: string) {
       .filter(
         (item) => item.sagaOrder === wanted && likelyItalianTitle(item.title),
       );
-    return candidates[0]?.title || '';
+    return relationTitle(candidates[0]?.title || '', author);
   };
+  const previousOrder = Number.isInteger(order) ? order - 1 : Math.floor(order);
+  const nextOrder = Number.isInteger(order) ? order + 1 : Math.ceil(order);
   return {
-    prequel: order > 1 ? await pick(order - 1) : '',
-    sequel: await pick(order + 1),
+    prequel: order > 1 ? await pick(previousOrder) : '',
+    sequel: await pick(nextOrder),
   };
 }
 const likelyItalianTitle = (value: string) =>
   !/^(?:der|die|das|ein|eine|the|a)\b/i.test(value) &&
   !/\b(?:tod|toten\w*|mord\w*|death|dead|whispers?|calling)\b/i.test(value);
+
+export function relationTitle(value: string, author: string) {
+  let result = clean(value)
+    .replace(/\s+(?:di|by)\s+.+$/i, '')
+    .replace(/\s*[|–—-]\s*(?:libro|book|goodreads|amazon).*$/i, '');
+  const parts = author.split(/\s+/).filter(Boolean);
+  const last = parts.at(-1) || '';
+  const first = parts.slice(0, -1).join(' ');
+  if (last && first)
+    result = result.replace(
+      new RegExp(
+        `\\s+${escapeRegex(last)}\\s*,\\s*${escapeRegex(first)}(?:\\s+(?:and|e|&)\\s+.+)?$`,
+        'i',
+      ),
+      '',
+    );
+  return naturalTitle(result.trim());
+}
 
 async function indexedSearch(query: string) {
   const encoded = encodeURIComponent(query);
@@ -834,12 +908,7 @@ export async function GET(request: Request) {
   const type = detect(query);
   const normalized = query.replace(/[\s-]/g, '');
   const [goodreads, italian] = await Promise.all([
-    source(
-      `https://www.goodreads.com/search?q=${encodeURIComponent(query)}`,
-      'Goodreads',
-      query,
-      type,
-    ),
+    goodreadsSources(query, type),
     source(
       `https://www.libreriauniversitaria.it/ricerca/query/${encodeURIComponent(normalized)}/gzuzqkrI_qOHGlQ966Pc-A`,
       'Libreria Universitaria',
@@ -1001,8 +1070,14 @@ export async function GET(request: Request) {
     const correction = catalogCorrections[normalized];
     results[0] = {
       ...results[0],
-      prequel: results[0].prequel || adjacent.prequel,
-      sequel: results[0].sequel || adjacent.sequel,
+      prequel: relationTitle(
+        results[0].prequel || adjacent.prequel,
+        results[0].author,
+      ),
+      sequel: relationTitle(
+        results[0].sequel || adjacent.sequel,
+        results[0].author,
+      ),
       ...correction,
       genres: correction?.genres || [
         ...new Set([...results[0].genres, ...inferGenres(results[0].plot)]),

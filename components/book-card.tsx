@@ -19,7 +19,7 @@ export function BookCard({
       <aside className="mx-auto w-[150px]">
         {book.coverUrl ? (
           <img
-            src={coverSrc(book.coverUrl)}
+            src={coverSrc(book.coverUrl, book.code)}
             alt={`Copertina di ${book.title}`}
             className="h-[220px] w-[150px] rounded-lg object-cover shadow-md"
           />

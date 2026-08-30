@@ -244,7 +244,7 @@ export function BookDialog({
               >
                 {option.coverUrl ? (
                   <img
-                    src={coverSrc(option.coverUrl)}
+                    src={coverSrc(option.coverUrl, option.code)}
                     alt=""
                     className="h-20 w-14 rounded object-cover"
                   />
@@ -349,7 +349,7 @@ export function BookDialog({
         <div className="grid min-h-40 grid-cols-[105px_1fr] gap-5 rounded-xl border border-dashed border-[#d4b99b] p-4">
           {draft.coverUrl ? (
             <img
-              src={coverSrc(draft.coverUrl)}
+              src={coverSrc(draft.coverUrl, draft.code)}
               alt="Anteprima copertina"
               className="h-36 w-24 rounded object-cover"
             />

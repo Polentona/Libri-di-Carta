@@ -29,3 +29,13 @@ Local Git operations are allowed, including:
 When remote repository access is required, use GitHub/Codex cloud functionality instead of the local Windows Git runtime.
 
 If the required remote operation cannot be performed without local Git HTTPS access, stop and tell the user. Do NOT fall back to running the remote Git command locally.
+
+## Action checklist
+
+After completing and verifying a requested change, always update `Azioni.txt` in the same task:
+
+- mark each completed activity with `[x]`;
+- wrap its original text in Markdown strikethrough markers (`~~text~~`);
+- add a concise `Commento:` when useful to document the implemented general solution and the verification performed;
+- never mark an activity complete before its implementation and relevant tests have succeeded;
+- keep the repository copy and the original Drive copy of `Azioni.txt` synchronized whenever both are available.
